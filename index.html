@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="For my princess">
+    <title>Priscilla</title>
+    <style>
+        :root {
+            --neon-blue: #00d2ff; --deep-blue: #0044ff; --dark-terminal: #03050a; --text-cyan: #8ec5fc; --overlay-color: rgba(0,0,0,0.9);
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #020306; min-height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; font-family: 'Courier New', Courier, monospace; image-rendering: pixelated;
+        }
+        .intro-screen {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; display: flex; justify-content: center; align-items: center; z-index: 10; transition: transform 0.65s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.5s ease;
+        }
+        .intro-screen.zoom-out { transform: scale(3.5); opacity: 0; pointer-events: none; }
+        .pixel-room-bg {
+            position: relative; width: 100vw; height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; background: radial-gradient(circle at center, #111424 0%, #020306 100%);
+        }
+        .room-viewport {
+            position: relative; width: 750px; height: 500px; background: #0d0f1a; border-bottom: 50px solid #1f140e; filter: drop-shadow(0 0 40px rgba(0, 68, 255, 0.2)); overflow: hidden;
+        }
+        .poster-wall { position: absolute; top: 25px; left: 25px; display: flex; gap: 20px; z-index: 2; }
+        .real-poster { width: 85px; height: 120px; border: 2px solid rgba(0, 210, 255, 0.3); box-shadow: 4px 4px 12px rgba(0,0,0,0.7); object-fit: cover; cursor: pointer; transition: transform 0.2s, border-color 0.2s; }
+        .real-poster:hover { transform: scale(1.05); border-color: var(--neon-blue); }
+        .bookshelf { position: absolute; top: 78px; right: 35px; width: 130px; height: 8px; background: #3a2214; border: 2px solid #000; border-top: none; z-index: 2; }
+        .book-stack { position: absolute; bottom: 8px; right: 10px; display: flex; align-items: flex-end; gap: 4px; cursor: pointer; z-index: 4; }
+        .book-stack:hover { filter: drop-shadow(0 0 10px #ffb7b2); }
+        .book { width: 9px; background: #4ea5ad; height: 36px; border: 2px solid #000; }
+        .book.pink { background: #ffb7b2; height: 28px; }
+        .book.purple { background: #c1bbf0; height: 42px; }
+        .book.lean { background: #f3cd59; height: 34px; transform: rotate(14deg); transform-origin: bottom right; }
+        .custom-frame-art { position: absolute; top: 35px; left: 450px; width: 100px; height: 100px; cursor: pointer; z-index: 2; transition: transform 0.2s, border-color 0.2s; border: 4px solid #422517; box-shadow: inset 0 0 0 2px #000, 4px 4px 12px rgba(0,0,0,0.6); }
+        .custom-frame-art:hover { transform: scale(1.03); border-color: #5c3826; filter: drop-shadow(0 0 10px rgba(0, 210, 255, 0.2)); }
+        .inner-canvas-photo { width: 100%; height: 100%; object-fit: cover; border: 1px solid #000; }
+        .desk-setup { position: absolute; bottom: 0; left: 100px; width: 550px; height: 55px; background: #2b180d; border: 2px solid #000; }
+        .lily-vase { position: absolute; bottom: 45px; left: 140px; width: 45px; height: 60px; cursor: pointer; z-index: 3; transition: filter 0.2s; }
+        .lily-vase:hover { filter: drop-shadow(0 0 10px #fff); }
+        .vase-pot { position: absolute; bottom: 0; left: 12px; width: 20px; height: 22px; background: #717a61; border: 2px solid #000; border-radius: 0 0 4px 4px; }
+        .lily-stem { position: absolute; bottom: 20px; left: 20px; width: 3px; height: 25px; background: #3d4f43; }
+        .lily-stem.left { transform: rotate(-25deg); height: 22px; left: 16px; }
+        .lily-stem.right { transform: rotate(25deg); height: 22px; left: 24px; }
+        .flower-head { position: absolute; top: -10px; left: -6px; width: 14px; height: 12px; background: #ffffff; border: 1.5px solid #000; border-radius: 50% 50% 0 0; }
+        .flower-center { position: absolute; top: 4px; left: 4px; width: 3px; height: 3px; background: #f3cd59; border-radius: 50%; }
+        .clairo-vinyl-setup { position: absolute; bottom: 48px; left: 195px; width: 52px; height: 52px; cursor: pointer; z-index: 3; transition: filter 0.2s; }
+        .clairo-vinyl-setup:hover { filter: drop-shadow(0 0 10px #eedcb3); }
+        .vinyl-cover-art { width: 100%; height: 100%; border: 2px solid #000; object-fit: cover; box-shadow: 3px 3px 6px rgba(0,0,0,0.5); }
+        .crt-monitor { position: absolute; bottom: 45px; left: 265px; width: 220px; height: 165px; background: #22252c; border: 3px solid #000; border-radius: 12px; padding: 12px; display: flex; flex-direction: column; box-shadow: inset -15px -15px 0 #15171c; cursor: pointer; }
+        .screen-glow { width: 100%; height: 110px; background: var(--deep-blue); border-radius: 8px; border: 2px solid #000; opacity: 0.7; animation: pcFlicker 0.2s infinite alternate; }
+        .monitor-panel { width: 100%; height: 30px; display: flex; align-items: center; padding: 0 10px; gap: 12px; margin-top: auto; }
+        .btn-dot { width: 6px; height: 6px; background: #555; border-radius: 50%; }
+        .power-button { width: 16px; height: 10px; background: #111; margin-left: auto; border-radius: 2px; border: 1px solid #444; }
+        .power-led { width: 6px; height: 6px; background: var(--neon-blue); border-radius: 50%; animation: ledPulse 1s infinite alternate; box-shadow: 0 0 8px var(--neon-blue); }
+        .chair-back { position: absolute; bottom: 15px; left: 340px; width: 70px; height: 45px; background: #5a1818; border: 2px solid #000; border-radius: 6px; z-index: 1; }
+        .blonde-girl-back { position: absolute; bottom: -10px; left: 335px; width: 80px; height: 110px; background: #2d233c; border: 2px solid #000; border-radius: 10px 10px 0 0; z-index: 2; }
+        .hair-layer { position: absolute; top: -55px; left: -2px; width: 84px; height: 75px; background: #f3cd59; border: 2px solid #000; border-radius: 35px 35px 10px 10px; animation: girlNod 3s ease-in-out infinite; transform-origin: bottom center; box-shadow: inset -10px 0 0 #deb43a; }
+        @keyframes pcFlicker { 0% { opacity: 0.5; } 100% { opacity: 0.7; } }
+        @keyframes girlNod { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(3px); } }
+        @keyframes ledPulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
+        .pixel-prompt { margin-top: 25px; font-size: 1.2rem; color: var(--text-cyan); letter-spacing: 2px; animation: softBlink 1.8s infinite; text-transform: uppercase; font-weight: bold; text-align: center; }
+        @keyframes softBlink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+        .poster-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--overlay-color); display: flex; justify-content: center; align-items: center; gap: 40px; padding: 40px; z-index: 20; opacity: 0; pointer-events: none; transition: opacity 0.4s ease, background-color 0.4s ease; }
+        .poster-overlay.active { opacity: 1; pointer-events: auto; }
+        .focused-poster { width: 220px; height: 310px; border: 2px solid rgba(255,255,255,0.2); box-shadow: 0 0 40px rgba(0,0,0,0.8); object-fit: cover; transform: translateY(20px); transition: transform 0.4s ease; }
+        .poster-overlay.active .focused-poster { transform: translateY(0); }
+        .floating-poem { flex: 1; max-width: 400px; color: #fff; font-size: 1.15rem; line-height: 1.8; font-style: italic; text-shadow: 0 2px 10px rgba(0,0,0,0.9); font-family: 'Georgia', serif; white-space: pre-line; }
+        .desktop-screen { width: 100vw; height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .desktop-screen.hidden { display: none; opacity: 0; }
+        .vintage-desktop { width: 100vw; height: 100vh; background-color: var(--dark-terminal); position: relative; display: flex; justify-content: center; align-items: center; background-image: linear-gradient(rgba(0, 68, 255, 0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 68, 255, 0.03) 1px, transparent 1px); background-size: 20px 20px; }
+        .win-window { width: 90%; max-width: 520px; background-color: #050811; border: 2px solid var(--deep-blue); box-shadow: 0 0 30px rgba(0, 68, 255, 0.3); padding: 4px; border-radius: 8px; }
+        .win-title-bar { background: linear-gradient(90deg, var(--deep-blue), #001144); padding: 6px 12px; display: flex; align-items: center; color: var(--neon-blue); font-weight: bold; font-size: 0.8rem; letter-spacing: 1px; text-transform: uppercase; border-radius: 4px 4px 0 0; }
+        .win-controls { margin-left: auto; display: flex; gap: 6px; }
+        .win-controls button { background: transparent; border: 1px solid var(--deep-blue); color: var(--neon-blue); width: 20px; height: 18px; font-size: 0.7rem; font-weight: bold; cursor: pointer; display: flex; justify-content: center; align-items: center; border-radius: 3px; }
+        .win-controls button:hover { background: var(--deep-blue); color: #fff; }
+        .win-body { padding: 2.5rem 1.5rem; text-align: center; }
+        h1 { font-size: 1.4rem; color: #fff; font-weight: bold; margin-bottom: 0.5rem; letter-spacing: 2px; text-transform: uppercase; text-shadow: 0 0 10px var(--deep-blue); }
+        .win-subtitle { font-size: 0.8rem; color: var(--text-cyan); margin-bottom: 2rem; letter-spacing: 1px; }
+        .app-core { height: 180px; display: flex; justify-content: center; align-items: center; position: relative; margin-bottom: 1.5rem; }
+        .pickle-clicker { font-size: 85px; cursor: pointer; user-select: none; animation: gentleFloat 4s ease-in-out infinite; z-index: 2; }
+        .pickle-clicker.vanish { transform: scale(0); opacity: 0; pointer-events: none; }
+        .win-alert-box { position: absolute; width: 100%; background: #070c18; border: 1px solid var(--neon-blue); box-shadow: 0 0 15px rgba(0, 210, 255, 0.1); opacity: 0; transform: scale(0.96); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); z-index: 3; pointer-events: none; text-align: left; border-radius: 6px; }
+        .win-alert-box.reveal { opacity: 1; transform: scale(1); pointer-events: auto; }
+        .alert-header { background: rgba(0, 68, 255, 0.2); color: var(--neon-blue); font-size: 0.75rem; font-weight: bold; padding: 6px 12px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid rgba(0, 210, 255, 0.2); }
+        .alert-text { padding: 20px 16px; color: var(--text-cyan); font-family: 'Georgia', serif; font-style: italic; }
+        .alert-text p { font-size: 1.05rem; line-height: 1.8; white-space: pre-line; text-shadow: 0 0 5px rgba(0, 210, 255, 0.2); }
+        .win-btn { background: transparent; border: 1px solid var(--neon-blue); padding: 10px 28px; font-size: 0.85rem; color: var(--neon-blue); cursor: pointer; opacity: 0; pointer-events: none; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; border-radius: 20px; transition: all 0.2s; box-shadow: 0 0 10px rgba(0, 210, 255, 0.05); }
+        .win-btn.reveal { opacity: 1; pointer-events: auto; }
+        .win-btn:hover { background: var(--neon-blue); color: var(--dark-terminal); box-shadow: 0 0 20px var(--neon-blue); }
+        .win-taskbar { position: absolute; bottom: 0; left: 0; width: 100%; height: 36px; background-color: #070c18; border-top: 1px solid var(--deep-blue); display: flex; align-items: center; padding: 2px 8px; gap: 8px; z-index: 5; }
+        .win-start-btn { background: var(--deep-blue); color: #fff; font-weight: bold; font-size: 0.8rem; border: none; padding: 4px 12px; cursor: pointer; border-radius: 4px; }
+        .win-back-btn { background: transparent; border: 1px solid var(--deep-blue); color: var(--text-cyan); font-size: 0.75rem; padding: 4px 12px; cursor: pointer; border-radius: 4px; transition: all 0.2s; }
+        .win-back-btn:hover { border-color: var(--neon-blue); color: #fff; }
+        .win-clock { margin-left: auto; color: var(--neon-blue); font-size: 0.8rem; padding: 3px 10px; font-family: monospace; }
+    </style>
+</head>
+<body>
+    <div class="intro-screen" id="intro-screen">
+        <div class="pixel-room-bg">
+            <div class="room-viewport">
+                <div class="poster-wall">
+                    <img class="real-poster" src="big.jpg" alt="Quero Ser Grande" onclick="focusPoem(event, 'big.jpg', '“Você passou a vida inteira tentando crescer, e agora que conseguiu, só quer voltar a ser criança.”', 'rgba(120, 25, 18, 0.95)')">
+                    <img class="real-poster" src="audrey.jpg" alt="Bonequinha de Luxo" onclick="focusPoem(event, 'audrey.jpg', '“Não importa para onde você corra, você acaba sempre se deparando com você mesma.”', 'rgba(18, 90, 96, 0.95)')">
+                    <img class="real-poster" src="asta.jpg" alt="Asta - Black Clover" onclick="focusPoem(event, 'asta.jpg', '“O mistério do destino humano é que somos fatais, mas temos a liberdade de cumprir ou não o nosso fado.”', 'rgba(20, 28, 38, 0.95)')">
+                </div>
+                <div class="poster-overlay" id="poster-overlay" onclick="closePoem(event)">
+                    <img class="focused-poster" id="focused-img" src="" alt="Foco">
+                    <p class="floating-poem" id="focused-text"></p>
+                </div>
+                <!-- QUADRO REPOSICIONADO EXATAMENTE NO MEIO DO ESPAÇO LIVRE -->
+                <div class="custom-frame-art" onclick="focusPoem(event, 'quadro.jpg', '“afogue-se comigo nesse lindo mar”', 'rgba(14, 32, 66, 0.95)')">
+                    <img class="inner-canvas-photo" src="quadro.jpg" alt="Seu Quadro">
+                </div>
+                <div class="bookshelf">
+                    <div class="book-stack" onclick="focusPoem(event, '', '“Renda-se, como eu me rendi. Mergulhe no que você não conhece como eu mergulhei. Perder-se também é caminho.”', 'rgba(110, 48, 75, 0.95)')">
+                        <div class="book"></div><div class="book pink"></div>
+                        <div class="book purple"></div><div class="book lean"></div>
+                    </div>
+                </div>
+                <div class="lily-vase" onclick="focusPoem(event, '', '“Que minha solidão me sirva de companhia. Que eu tenha a coragem de me enfrentar.”', 'rgba(30, 40, 55, 0.95)')">
+                    <div class="lily-stem left"><div class="flower-head"><div class="flower-center"></div></div></div>
+                    <div class="lily-stem right"><div class="flower-head"><div class="flower-center"></div></div></div>
+                    <div class="lily-stem"><div class="flower-head"><div class="flower-center"></div></div></div>
+                    <div class="vase-pot"></div>
+                </div>
+                <div class="clairo-vinyl-setup" onclick="focusPoem(event, 'clairo.jpg', '“O seu gosto musical é incrível.”', 'rgba(222, 210, 200, 0.95)')">
+                    <img class="vinyl-cover-art" src="clairo.jpg" alt="Clairo Vinyl">
+                </div>
+                <div class="desk-setup" onclick="enterComputer()"></div>
+                <div class="crt-monitor" onclick="enterComputer()">
+                    <div class="screen-glow"></div>
+                    <div class="monitor-panel">
+                        <div class="btn-dot"></div><div class="btn-dot"></div>
+                        <div class="power-button"></div><div class="power-led"></div>
+                    </div>
+                </div>
+                <div class="chair-back" onclick="enterComputer()"></div>
+                <div class="blonde-girl-back" onclick="enterComputer()"><div class="hair-layer"></div></div>
+            </div>
+            <div class="pixel-prompt">Interaja com tudo, princesa</div>
+        </div>
+    </div>
+    <div class="desktop-screen hidden" id="desktop-screen">
+        <div class="vintage-desktop">
+            <div class="win-window">
+                <div class="win-title-bar">
+                    <div class="win-title">oracle_system.sys</div>
+                    <div class="win-controls"><button class="win-min-btn">_</button><button class="win-close-btn" onclick="backToRoom()">X</button></div>
+                </div>
+                <div class="win-body">
+                    <h1>ORÁCULO DO PEPININHO</h1>
+                    <p class="win-subtitle">Acesso Direto // Leia e descubra</p>
+                    <div class="app-core">
+                        <div class="pickle-clicker" id="pickle" onclick="openOracle()">🥒</div>
+                        <div class="win-alert-box" id="scroll">
+                            <div class="alert-header"><span>◆ Transmissão de Pensamento ◆</span></div>
+                            <div class="alert-text"><p id="fortune-text">Processando dados...</p></div>
+                        </div>
+                    </div>
+                    <button class="win-btn" id="btn" onclick="resetOracle()"><span>abra o pepininho, sweet</span></button>
+                </div>
+            </div>
+            <div class="win-taskbar">
+                <button class="win-start-btn">🏁 OS</button>
+                <button class="win-back-btn" onclick="backToRoom()">◀ Deslogar do Sistema</button>
+                <div class="win-clock" id="taskbar-clock">00:00</div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const pickle = document.getElementById('pickle'); const scroll = document.getElementById('scroll'); const textDisplay = document.getElementById('fortune-text'); const actionBtn = document.getElementById('btn'); const introScreen = document.getElementById('intro-screen'); const desktopScreen = document.getElementById('desktop-screen'); const clockElement = document.getElementById('taskbar-clock'); const posterOverlay = document.getElementById('poster-overlay'); const focusedImg = document.getElementById('focused-img'); const focusedText = document.getElementById('focused-text');
+        const fortunes = [
+            "“Que minha solidão me sirva de companhia.\nQue eu tenha a coragem de me enfrentar.”",
+            "“Perder-se também é caminho.”",
+            "“A única verdade é que vivo.\nSinceramente, eu vivo. Quem sou?\nBem, isso já é demais.”",
+            "“Renda-se, como eu me rendi.\nMergulhe no que você não conhece\ncomo eu mergulhei.”",
+            "“O mistério do destino humano\né que somos fatais, mas temos a liberdade\nde cumprir ou não o nosso fado.”",
+            "“Não se preocupe em entender,\nviver ultrapassa qualquer entendimento.”",
+            "“Não importa para onde você corra,\nvocê acaba sempre se deparando\ncom você mesma.”",
+            "“Eu não quero te colocar em uma gaiola.\nEu quero te amar.”",
+            "“Nós pertencemos a ninguém\ne ninguém pertence a nós. Nós nem sequer\npertencemos um ao outro.”",
+            "“A vida se move muito rápido.\nSe você não parar e olhar ao redor\nde vez em quando, pode perdê-la.”",
+            "“Você passou a vida inteira tentando crescer,\ne agora que conseguiu,\nsó quer voltar a ser criança.”",
+            "“Você me lembra como é ver o mundo\npela primeira vez. Eu tinha esquecido\ncomo era essa sensação.”",
+            "“Gosto de me perder em você.”",
+            "“Gosto da sua risada.”",
+            "“Gosto quando você fala que pensa em mim.”",
+            "“O seu jeito de escrever é lindo.”",
+            "“O seu gosto musical é incrível.”",
+            "“Você é o tipo de homem por quem eu posso\nfazer papel de boba...\ne eu não gosto disso.”",
+            "“Você é a pessoa mais encantadora\nque eu já conheci.”",
+            "“Deixar você tímida é o meu passatempo preferido.”",
+            "“Acho lindo a sua forma de ver o mundo.”"
+        ];
+        const pouSound = new Audio('pou-nah-short.mp3');
+        function updateClock() { const now = new Date(); const hours = String(now.getHours()).padStart(2, '0'); const minutes = String(now.getMinutes()).padStart(2, '0'); clockElement.innerText = `${hours}:${minutes}`; }
+        setInterval(updateClock, 1000); updateClock();
+        function focusPoem(e, imgSrc, text, backgroundColor) {
+            e.stopPropagation();
+            posterOverlay.style.backgroundColor = backgroundColor;
+            if (imgSrc) { focusedImg.style.display = 'block'; focusedImg.src = imgSrc; } 
+            else { focusedImg.style.display = 'none'; }
+            focusedText.innerText = text;
+            posterOverlay.classList.add('active');
+        }
+        document.addEventListener('keydown', function(e) { if(e.key === "Escape") posterOverlay.classList.remove('active'); });
+        function closePoem(e) { e.stopPropagation(); posterOverlay.classList.remove('active'); }
+        function enterComputer() { introScreen.classList.add('zoom-out'); pouSound.play().catch(() => {}); setTimeout(() => { introScreen.style.display = 'none'; desktopScreen.classList.remove('hidden'); }, 650); }
+        function backToRoom() { resetOracle(); desktopScreen.classList.add('hidden'); introScreen.style.display = 'flex'; setTimeout(() => { introScreen.classList.remove('zoom-out'); }, 50); }
+        function openOracle() { if (pickle.classList.contains('vanish')) return; try { pouSound.currentTime = 0; pouSound.volume = 0.6; pouSound.play(); } catch (err) {} pickle.classList.add('vanish'); setTimeout(() => { const randomIndex = Math.floor(Math.random() * fortunes.length); textDisplay.innerText = fortunes[randomIndex]; pickle.style.display = 'none'; scroll.classList.add('reveal'); actionBtn.classList.add('reveal'); }, 300); }
+        function resetOracle() { scroll.classList.remove('reveal'); actionBtn.classList.remove('reveal'); setTimeout(() => { pickle.style.display = 'block'; pickle.classList.remove('vanish'); }, 300); }
+    </script>
+</body>
+</html>
